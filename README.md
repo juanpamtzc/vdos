@@ -7,7 +7,7 @@
 ## Overview
 This repository contains a modular, high-performance Python pipeline for extracting, processing, and analyzing large-scale Molecular Dynamics (MD) trajectories generated via LAMMPS. 
 
-Specifically, this codebase processes physical systems at $1 \text{ atm}$ (e.g., interfacial water and ion clusters), isolating internal molecular kinematics from center-of-mass (COM) and rigid-body rotational motion. It computes the Vibrational Density of States (VDOS) by applying Fast Fourier Transforms (FFT) to the velocity autocorrelation function:
+Specifically, this codebase processes physical systems at $1 \text{ atm}$ (e.g., interfacial water and ion clusters), isolating internal molecular kinematics from center-of-mass (COM) and rigid-body rotational motion. It computes the Vibrational Density of States (VDOS) by computing the mass-weighed velocity power spectrum:
 
 $$\text{VDOS}(\omega) \propto \int_{-\infty}^{\infty} \langle \vec{v}(t) \cdot \vec{v}(0) \rangle e^{-i\omega t} dt$$
 
