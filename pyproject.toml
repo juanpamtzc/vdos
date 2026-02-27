@@ -1,0 +1,21 @@
+[build-system]
+# Tells Python what tool to use to build your package
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# The name of your library (use the exact folder name of your source code)
+name = "jpmc_md_tools"
+version = "0.1.0"
+description = "Molecular Dynamics data processing and analysis tools"
+readme = "README.md"
+requires-python = ">=3.8"
+
+# List any external libraries your code needs to run here!
+# Python will automatically install them if someone else runs your code.
+dependencies = [
+    "numpy",
+    "scipy",
+    "typing",
+    "logging"
+]
