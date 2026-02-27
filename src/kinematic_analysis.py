@@ -245,4 +245,77 @@ def compute_angular_velocity_from_basis_vectors(a: np.array, b: np.array, c: np.
 
     return angular_velocities
 
+def unwrap_trj(oxygens: np.array, h1s: np.array, h2s: np.array, data: dict) -> tuple:
+    '''
+    Apply periodic boundary conditions to unwrap the trajectory data for a system of water molecules.
+    Parameters:
+        oxygens: A numpy array of shape (M, N_water_molecules, 3) representing the positions of oxygen atoms for each water molecule at each time step.
+        h1s: A numpy array of shape (M, N_water_molecules, 3) representing the positions of the first hydrogen atoms for each water molecule at each time step.
+        h2s: A numpy array of shape (M, N_water_molecules, 3) representing the positions of the second hydrogen atoms for each water molecule at each time step.
+        data: A dictionary containing the atomic data, including the dimensions of the simulation box (xlo, xhi, ylo, yhi, zlo, zhi) used for applying periodic boundary conditions.
+    Returns:
+        A tuple containing:
+            - oxygens: A numpy array of shape (M, N_water_molecules, 3) representing the unwrapped positions of oxygen atoms for each water molecule at each time step. The positions are adjusted to account for periodic boundary conditions, ensuring that the trajectory data reflects the true movement of the molecules across the simulation box boundaries.
+            - h1s: A numpy array of shape (M, N_water_molecules, 3) representing the unwrapped positions of the first hydrogen atoms for each water molecule at each time step, adjusted for periodic boundary conditions.
+            - h2s: A numpy array of shape (M, N_water_molecules, 3) representing the unwrapped positions of the second hydrogen atoms for each water molecule at each time step, adjusted for periodic boundary conditions.
+    '''
+
+    box_size=[np.double(data["xhi"])-np.double(data["xlo"]),np.double(data["yhi"])-np.double(data["ylo"]),np.double(data["zhi"])-np.double(data["zlo"])]
+
+    h1s = h1s - np.round((h1s - oxygens) / box_size) * box_size
+    h2s = h2s - np.round((h2s - oxygens) / box_size) * box_size
+
+    return oxygens,h1s,h2s
+
+def compute_internal_velocities(local_atom_v: np.array, local_COM_v: np.array, r_local: np.array, omega: np.array) -> np.array:
+    """
+    Compute the internal velocities of atoms in a molecule by removing the contributions from the center of mass motion and the rotational motion.
+    Parameters:
+        local_atom_v: A numpy array of shape (T, M, 3) representing the velocities of individual atoms in the local basis for each molecule at each time step.
+        local_COM_v: A numpy array of shape (T, M, 3) representing the velocities of the center of mass for each molecule at each time step.
+        r_local: A numpy array of shape (T, M, 3) representing the positions of individual atoms relative to the center of mass in the local basis for each molecule at each time step.
+        omega: A numpy array of shape (T, M, 3) representing the angular velocity of the local basis vectors for each molecule at each time step.
+    Returns:
+        A numpy array of shape (T, M, 3) representing the internal velocities of the atoms in the local basis for each molecule at each time step, with the contributions from the center of mass motion and the rotational motion removed. The internal velocity is calculated as:
+        internal_velocity = local_atom_v - local_COM_v - (omega × r_local)
+        where "×" denotes the cross product. This calculation effectively isolates the vibrational motion of the atoms within the molecule by removing the translational motion of the center of mass and the rotational motion of the molecule as a whole.
+    """
+    # Cross product of angular velocity with local position: ω × r
+    # omega: shape (T, M, 3)
+    # r_local: shape (T, M, 3)
+
+    rotational_contrib = np.cross(omega, r_local)  # shape: (T, M, 3)
+
+    return local_atom_v - local_COM_v - rotational_contrib
+
+def project_onto_local_ref_frame(v: np.array, a: np.array, b: np.array, c: np.array) -> np.array:
+    '''
+    Project the velocities of atoms onto the local reference frame defined by the basis vectors a, b, and c for each molecule at each time step.
+    Parameters:
+        v: A numpy array of shape (T, M, 3) representing the velocities of individual atoms in the global reference frame for each molecule at each time step.
+        a: A numpy array of shape (T, M, 3) representing the first local basis unit vector for each molecule at each time step.
+        b: A numpy array of shape (T, M, 3) representing the second local basis unit vector for each molecule at each time step.
+        c: A numpy array of shape (T, M, 3) representing the third local basis unit vector for each molecule at each time step.
+    Returns:
+        A numpy array of shape (T, M, 3) representing the velocities of individual atoms projected onto the local reference frame defined by the basis vectors a, b, and c for each molecule at each time step. The projection is calculated by taking the dot product of the velocity vector with each of the basis vectors, effectively transforming the velocity from the global reference frame to the local reference frame defined by the orientation of the molecule. The resulting array contains the components of the velocity in the directions of the local basis vectors a, b, and c, which can be used for further analysis of the internal dynamics of the molecule.
+    '''
+    
+    
+    if v.shape[2]>3:
+        print("WARNING: v has shape "+str(v.shape))
+        print("Using v[:,:,"+str(v.shape[2]-3)+":]")
+        v=v[:,:,v.shape[2]-3]
+
+    # Each of A, B, C has shape (M, N, 3)
+    R = np.stack([a, b, c], axis=-2)  # Shape: (M, N, 3, 3)
+
+    # v: shape (M, N, 3)
+    # R: shape (M, N, 3, 3)
+    local_v = np.einsum('mnij,mnj->mni', R, v)
+
+    return local_v
+
+
+
+
 
