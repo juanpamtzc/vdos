@@ -1,33 +1,39 @@
 # High-Performance LAMMPS VDOS Analysis Pipeline
 
-![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+[![ci](https://github.com/juanpamtzc/vdos/actions/workflows/ci.yml/badge.svg)](https://github.com/juanpamtzc/vdos/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)
 ![LAMMPS](https://img.shields.io/badge/LAMMPS-MD-red.svg)
 ![HPC](https://img.shields.io/badge/HPC-SLURM-orange)
 
 ## Overview
 This repository contains a modular, high-performance Python pipeline for extracting, processing, and analyzing large-scale Molecular Dynamics (MD) trajectories generated via LAMMPS. 
 
-Specifically, this codebase processes physical systems at $1 \text{ atm}$ (e.g., interfacial water and ion clusters), isolating internal molecular kinematics from center-of-mass (COM) and rigid-body rotational motion. It computes the Vibrational Density of States (VDOS) by computing the mass-weighed velocity power spectrum:
+Specifically, this codebase computes the Vibrational Density of States (VDOS) of water by evaluating the mass-weighted velocity power spectral density (PSD):
 
-$$\text{VDOS}(\omega) \propto \int_{-\infty}^{\infty} \langle \vec{v}(t) \cdot \vec{v}(0) \rangle e^{-i\omega t} dt$$
+$$g(\tilde{\nu}) = \frac{2}{k_B T} \sum_{i=1}^{N} \sum_{\alpha=1}^{d} m_i \lim_{\tau \to \infty} \frac{1}{2\tau} \mathbb{E} \left[ \left| \int_{-\tau}^{\tau} v_i^\alpha(t) e^{-i 2\pi \nu t} dt \right|^2 \right]$$
 
-This project was built to process multi-gigabyte trajectory datasets efficiently on cluster supercomputers using batch processing, while outputting lightweight data for visualization.
+This project was built to process multi-gigabyte trajectory datasets efficiently.
 
-## 📁 Repository Architecture
+## Algorithmic Optimization: The Wiener-Khinchin Theorem
+A naive computation of the VDOS requires computing the Velocity Autocorrelation Function (VACF), which scales at $O(N^2)$ for trajectory length $N$. 
+
+By applying the **Wiener-Khinchin theorem**, the pipeline computes the VDOS directly from the magnitude squared of the Fast Fourier Transform (FFT) of the velocity trajectories. This reduces the time complexity to **$O(N \log N)$**, resulting in massive performance gains without any loss of mathematical fidelity.
+
+**For the rigorous mathematical proof, see:** [`docs/VDOS_Mathematical_Proof.pdf`](docs/VDOS_Mathematical_Proof.pdf)
+
+## Repository Architecture
 
 ```text
-├── lammps_inputs/           # LAMMPS initial configuration and execution scripts
-├── data/
-│   ├── raw/                 # Lightweight starting configurations (.dat)
-│   └── trajectories/        # [GIT IGNORED] Heavy .lammpstrj binary outputs
-├── notebooks/               # Jupyter Notebooks for final publication figure generation
+├── .github/workflows/       # CI/CD pipelines
+├── docs/                    # Mathematical documentation and proofs
+├── notebooks/               # Jupyter Notebooks for publication-ready visualizations
 ├── scripts/                 # Execution scripts for local and cluster environments
-│   ├── 01_parse_trajectories.py
-│   ├── 02_compute_vdos_bulk.py
-│   ├── 03_compute_vdos_ions.py
-│   └── run_lammps_cluster.sh
-├── src/                     # Core computational logic (The Engine)
+│   └── compute_vdos.py      # Main entry point for VDOS calculation
+├── src/jpmc_md_tools/       # Core computational logic (The Engine)
+│   ├── __init__.py
 │   ├── lammps_io.py         # Memory-efficient I/O for LAMMPS formats
 │   ├── kinematics.py        # Spatial math, internal velocities, and COM translations
-│   └── spectra.py           # FFT logic and VDOS computations
-└── README.md
+│   └── spectra.py           # FFT logic, signal processing, and VDOS
+├── tests/                   # Unit test suite (pytest/unittest)
+├── pyproject.toml           # Modern Python packaging configuration
+└── requirements.txt         # Dependency management
