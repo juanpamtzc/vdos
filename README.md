@@ -14,6 +14,8 @@ $$g(\tilde{\nu}) = \frac{2}{k_B T} \sum_{i=1}^{N} \sum_{\alpha=1}^{d} m_i \lim_{
 
 The VDOS gives spectral information of the fundamental dynamical modes of water (i.e., the frequencies at which different movements occur).
 
+To give a more detailed glimpse into the nature of the various dynamical modes, this pipeline allows the VDOS to be decomposed per degree of freedom, differentiating between translational, rotational, and internal degrees of freedom (as well as their directional components).
+
 ## Algorithmic Optimization: The Wiener-Khinchin Theorem
 A naive computation of the VDOS requires computing the Velocity Autocorrelation Function (VACF), which scales at $O(N^2)$ for trajectory length $N$. 
 
