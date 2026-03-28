@@ -12,7 +12,7 @@ Specifically, this codebase computes the Vibrational Density of States (VDOS) of
 
 $$g(\tilde{\nu}) = \frac{2}{k_B T} \sum_{i=1}^{N} \sum_{\alpha=1}^{d} m_i \lim_{\tau \to \infty} \frac{1}{2\tau} \mathbb{E} \left[ \left| \int_{-\tau}^{\tau} v_i^\alpha(t) e^{-i 2\pi \nu t} dt \right|^2 \right]$$
 
-This project was built to process multi-gigabyte trajectory datasets efficiently.
+The VDOS gives spectral information of the fundamental dynamical modes of water (i.e., the frequencies at which different movements occur).
 
 ## Algorithmic Optimization: The Wiener-Khinchin Theorem
 A naive computation of the VDOS requires computing the Velocity Autocorrelation Function (VACF), which scales at $O(N^2)$ for trajectory length $N$. 
