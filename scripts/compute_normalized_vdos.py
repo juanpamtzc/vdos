@@ -17,7 +17,7 @@ import os
 
 if __name__ == "__main__":
     # --- Set up Command Line Arguments ---
-    parser = argparse.ArgumentParser(description="Compute VDOS spectra from LAMMPS trajectories.")
+    parser = argparse.ArgumentParser(description="Compute normalized VDOS spectra from LAMMPS trajectories.")
     
     # Required Arguments
     parser.add_argument("--data_dir", type=str, required=True, help="Path to the directory containing trajectory files.")
