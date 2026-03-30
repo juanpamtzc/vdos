@@ -21,7 +21,7 @@ A naive computation of the VDOS requires computing the Velocity Autocorrelation 
 
 By applying the **Wiener-Khinchin theorem**, the pipeline computes the VDOS directly from the magnitude squared of the Fast Fourier Transform (FFT) of the velocity trajectories. This reduces the time complexity to **$O(N \log N)$**, resulting in massive performance gains without any loss of mathematical fidelity.
 
-**For the rigorous mathematical proof, see:** [`docs/VDOS_Mathematical_Proof.pdf`](docs/VDOS_Mathematical_Proof.pdf)
+**For the rigorous mathematical proof, see:** [`docs/VDOS_Math.pdf`](docs/VDOS_Math.pdf)
 
 ## Repository Architecture
 
